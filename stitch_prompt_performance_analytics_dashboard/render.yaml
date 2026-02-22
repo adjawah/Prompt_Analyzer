@@ -4,8 +4,4 @@ services:
     env: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
-    # Create a persistent disk to save the SQLite database
-    disk:
-      name: sqlite-data
-      mountPath: /data
-      sizeGB: 1
+    plan: free
