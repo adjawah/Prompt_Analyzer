@@ -2,7 +2,7 @@ services:
   - type: web
     name: prompt-performance-analytics
     env: python
-    rootDir: .
+    rootDir: stitch_prompt_performance_analytics_dashboard
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
     plan: free
