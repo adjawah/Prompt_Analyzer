@@ -3,13 +3,15 @@
 import aiosqlite
 import json
 import logging
+import os
 from typing import Optional
 
 from prompt_analyzer.config import ANALYTICS_DB_PATH
 
 logger = logging.getLogger(__name__)
 
-DB_PATH = ANALYTICS_DB_PATH
+# Use DB_PATH from environment if provided (useful for Render persistent disks), otherwise default to local file
+DB_PATH = os.getenv("DB_PATH", "analytics.db")
 
 CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS analyses (
