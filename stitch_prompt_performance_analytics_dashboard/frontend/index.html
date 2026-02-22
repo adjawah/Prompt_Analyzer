@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Analyzer — AI-Powered Prompt Quality Analysis</title>
+    <meta name="description" content="Analyze your prompts for clarity, efficiency, and structure. Get AI-powered rewrites and quality scores.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="brand-icon">
+                <span class="material-symbols-outlined">psychology</span>
+            </div>
+            <div>
+                <h1 class="brand-title">PromptAnalyzer</h1>
+                <span class="brand-version">v0.1.0</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="/dashboard-ui" class="btn btn-ghost">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-card">
+                <div class="card-header">
+                    <h2>
+                        <span class="material-symbols-outlined">edit_note</span>
+                        Enter Your Prompt
+                    </h2>
+                    <span class="badge badge-info">AI Analysis</span>
+                </div>
+                <div class="input-fields">
+                    <div class="field-group">
+                        <label for="prompt-input">Prompt</label>
+                        <textarea id="prompt-input" rows="8" placeholder="Paste or type your prompt here..."></textarea>
+                        <div class="field-footer">
+                            <span id="char-count" class="char-count">0 characters</span>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field-group flex-1">
+                            <label for="context-input">Context / Goal <span class="optional">(optional)</span></label>
+                            <input type="text" id="context-input" placeholder="e.g., Customer support chatbot, Code review...">
+                        </div>
+                        <div class="field-group flex-1">
+                            <label for="project-input">Project ID <span class="optional">(optional)</span></label>
+                            <input type="text" id="project-input" placeholder="e.g., customer_support_bot">
+                        </div>
+                    </div>
+                    <button id="analyze-btn" class="btn btn-primary btn-lg" onclick="analyzePrompt()">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        Analyze Prompt
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading -->
+        <section id="loading-section" class="loading-section hidden">
+            <div class="loading-card">
+                <div class="spinner"></div>
+                <p>Analyzing your prompt with Claude Opus...</p>
+                <p class="loading-sub">Scoring clarity, efficiency, structure, and more</p>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-section hidden">
+            <!-- Overall Score -->
+            <div class="overall-score-card" id="overall-score-card">
+                <div class="overall-score-ring">
+                    <svg viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="52" class="score-ring-bg"/>
+                        <circle cx="60" cy="60" r="52" class="score-ring-fill" id="score-ring"/>
+                    </svg>
+                    <span class="overall-score-value" id="overall-score">0</span>
+                </div>
+                <div class="overall-score-info">
+                    <h2>Overall Quality Score</h2>
+                    <p id="overall-label" class="score-label">—</p>
+                </div>
+            </div>
+
+            <!-- Score Cards -->
+            <div class="scores-grid">
+                <div class="score-card" id="score-clarity">
+                    <div class="score-card-header">
+                        <span class="material-symbols-outlined">visibility</span>
+                        <h3>Clarity</h3>
+                    </div>
+                    <div class="score-value-wrap">
+                        <span class="score-num" data-dimension="clarity">0</span>
+                        <span class="score-max">/100</span>
+                    </div>
+                    <p class="score-reasoning" id="reasoning-clarity"></p>
+                </div>
+                <div class="score-card" id="score-token_efficiency">
+                    <div class="score-card-header">
+                        <span class="material-symbols-outlined">token</span>
+                        <h3>Token Efficiency</h3>
+                    </div>
+                    <div class="score-value-wrap">
+                        <span class="score-num" data-dimension="token_efficiency">0</span>
+                        <span class="score-max">/100</span>
+                    </div>
+                    <p class="score-reasoning" id="reasoning-token_efficiency"></p>
+                </div>
+                <div class="score-card" id="score-goal_alignment">
+                    <div class="score-card-header">
+                        <span class="material-symbols-outlined">target</span>
+                        <h3>Goal Alignment</h3>
+                    </div>
+                    <div class="score-value-wrap">
+                        <span class="score-num" data-dimension="goal_alignment">0</span>
+                        <span class="score-max">/100</span>
+                    </div>
+                    <p class="score-reasoning" id="reasoning-goal_alignment"></p>
+                </div>
+                <div class="score-card" id="score-structure">
+                    <div class="score-card-header">
+                        <span class="material-symbols-outlined">account_tree</span>
+                        <h3>Structure</h3>
+                    </div>
+                    <div class="score-value-wrap">
+                        <span class="score-num" data-dimension="structure">0</span>
+                        <span class="score-max">/100</span>
+                    </div>
+                    <p class="score-reasoning" id="reasoning-structure"></p>
+                </div>
+                <div class="score-card" id="score-vagueness_index">
+                    <div class="score-card-header">
+                        <span class="material-symbols-outlined">blur_on</span>
+                        <h3>Vagueness</h3>
+                    </div>
+                    <div class="score-value-wrap">
+                        <span class="score-num" data-dimension="vagueness_index">0</span>
+                        <span class="score-max">/100</span>
+                    </div>
+                    <p class="score-reasoning" id="reasoning-vagueness_index"></p>
+                </div>
+            </div>
+
+            <!-- Mistakes -->
+            <div class="mistakes-card" id="mistakes-card">
+                <div class="card-header">
+                    <h2>
+                        <span class="material-symbols-outlined">bug_report</span>
+                        Identified Mistakes
+                    </h2>
+                    <span class="badge badge-error" id="mistake-count">0 issues</span>
+                </div>
+                <div id="mistakes-list" class="mistakes-list"></div>
+            </div>
+
+            <!-- Rewrite Comparison -->
+            <div class="rewrite-card" id="rewrite-card">
+                <div class="card-header">
+                    <h2>
+                        <span class="material-symbols-outlined">compare_arrows</span>
+                        Prompt Comparison
+                    </h2>
+                    <div class="token-savings" id="token-savings">
+                        <span class="material-symbols-outlined">savings</span>
+                        <span id="savings-text">0% saved</span>
+                    </div>
+                </div>
+                <div class="comparison-grid">
+                    <div class="comparison-col">
+                        <div class="comparison-label">
+                            <span class="dot dot-red"></span>Original
+                            <span class="token-badge" id="original-tokens">0 tokens</span>
+                        </div>
+                        <div class="comparison-text" id="original-text"></div>
+                    </div>
+                    <div class="comparison-col">
+                        <div class="comparison-label">
+                            <span class="dot dot-green"></span>Optimized Rewrite
+                            <span class="token-badge" id="rewritten-tokens">0 tokens</span>
+                        </div>
+                        <div class="comparison-text" id="rewritten-text"></div>
+                    </div>
+                </div>
+                <div class="rewrite-actions">
+                    <button class="btn btn-success" onclick="useRewrite()">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Use Rewritten Prompt
+                    </button>
+                    <button class="btn btn-outline" onclick="keepOriginal()">
+                        <span class="material-symbols-outlined">undo</span>
+                        Keep Original
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error -->
+        <section id="error-section" class="error-section hidden">
+            <div class="error-card">
+                <span class="material-symbols-outlined">error</span>
+                <h3>Analysis Failed</h3>
+                <p id="error-message">Something went wrong.</p>
+                <button class="btn btn-outline" onclick="hideError()">Try Again</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden">
+        <span class="material-symbols-outlined" id="toast-icon">check_circle</span>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

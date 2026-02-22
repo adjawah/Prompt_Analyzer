@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Prompt Performance Analytics</title>
+    <meta name="description" content="View analytics on prompt quality across all interactions, agents, and projects.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/dashboard-static/styles.css?v=2">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="brand-icon">
+                <span class="material-symbols-outlined">monitoring</span>
+            </div>
+            <div>
+                <h1 class="brand-title">Analytics Dashboard</h1>
+                <span class="brand-version">Prompt Performance</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="/" class="btn btn-ghost">
+                <span class="material-symbols-outlined">psychology</span>
+                Analyzer
+            </a>
+            <button class="btn btn-ghost" onclick="refreshAll()">
+                <span class="material-symbols-outlined">refresh</span>
+                Refresh
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dash-content">
+        <!-- KPI Cards -->
+        <section class="kpi-grid" id="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-blue"><span class="material-symbols-outlined">analytics</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-total">—</div>
+                    <div class="kpi-label">Total Interactions</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-green"><span class="material-symbols-outlined">speed</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-avg-score">—</div>
+                    <div class="kpi-label">Avg Quality Score</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-cyan"><span class="material-symbols-outlined">savings</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-savings">—</div>
+                    <div class="kpi-label">Avg Token Savings</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-purple"><span class="material-symbols-outlined">check_circle</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-rewrite">—</div>
+                    <div class="kpi-label">Rewrite Acceptance</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-amber"><span class="material-symbols-outlined">group</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-split">—</div>
+                    <div class="kpi-label">Human vs Agent</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-teal"><span class="material-symbols-outlined">token</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-total-tokens">—</div>
+                    <div class="kpi-label">Total Tokens</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-orange"><span class="material-symbols-outlined">avg_pace</span></div>
+                <div class="kpi-data">
+                    <div class="kpi-value" id="kpi-avg-tokens">—</div>
+                    <div class="kpi-label">Avg Tokens / Prompt</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><span class="material-symbols-outlined">show_chart</span> Quality Trend</h3>
+                    <div class="trend-filters" id="trend-filters">
+                        <button class="filter-btn" data-hours="1" onclick="setTrendFilter(this)">1h</button>
+                        <button class="filter-btn" data-hours="5" onclick="setTrendFilter(this)">5h</button>
+                        <button class="filter-btn" data-hours="12" onclick="setTrendFilter(this)">12h</button>
+                        <button class="filter-btn" data-days="1" onclick="setTrendFilter(this)">1d</button>
+                        <button class="filter-btn" data-days="10" onclick="setTrendFilter(this)">10d</button>
+                        <button class="filter-btn active" data-days="30" onclick="setTrendFilter(this)">1mo</button>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <canvas id="trend-chart" height="220"></canvas>
+                    <div id="trend-empty" class="chart-empty hidden">No trend data yet — analyze some prompts first!
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><span class="material-symbols-outlined">pie_chart</span> Common Mistakes</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="mistakes-chart" height="220"></canvas>
+                    <div id="mistakes-empty" class="chart-empty hidden">No mistakes recorded yet!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interaction Feed -->
+        <section class="feed-section">
+            <div class="feed-header">
+                <h2><span class="material-symbols-outlined">list_alt</span> Interaction Feed</h2>
+                <div class="feed-controls">
+                    <input type="text" id="feed-filter" placeholder="Filter by project..." class="feed-search"
+                        oninput="filterFeed()">
+                </div>
+            </div>
+            <div class="feed-table-wrap">
+                <table class="feed-table" id="feed-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Source</th>
+                            <th>Project</th>
+                            <th>Prompt</th>
+                            <th>Score</th>
+                            <th>Mistakes</th>
+                            <th>Savings</th>
+                            <th>Rewrite</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="feed-body">
+                        <tr>
+                            <td colspan="9" class="feed-empty">No interactions yet — go analyze some prompts!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="feed-pagination">
+                <button class="btn btn-outline btn-sm" id="prev-btn" onclick="prevPage()" disabled>← Previous</button>
+                <span id="page-info" class="page-info">Page 1</span>
+                <button class="btn btn-outline btn-sm" id="next-btn" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </section>
+
+        <!-- Agent Leaderboard -->
+        <section class="leaderboard-section">
+            <div class="feed-header">
+                <h2><span class="material-symbols-outlined">leaderboard</span> Agent Leaderboard</h2>
+            </div>
+            <div class="feed-table-wrap">
+                <table class="feed-table" id="agent-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Agent</th>
+                            <th>Prompts</th>
+                            <th>Avg Score</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agent-body">
+                        <tr>
+                            <td colspan="5" class="feed-empty">No agent data yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Detail Modal -->
+        <div class="modal-overlay hidden" id="detail-modal" onclick="closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>Analysis Detail</h3>
+                    <button class="btn btn-ghost" onclick="closeDetail()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script src="/dashboard-static/app.js?v=2"></script>
+</body>
+
+</html>

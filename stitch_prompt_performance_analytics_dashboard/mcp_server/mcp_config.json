@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+        "prompt-analyzer": {
+            "command": "python",
+            "args": [
+                "-m",
+                "mcp_server.server"
+            ],
+            "cwd": "/Users/ananya/Downloads/stitch_prompt_performance_analytics_dashboard"
+        }
+    }
+}
